@@ -1,12 +1,2 @@
 ﻿  Source.cpp
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(46,20): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(48,22): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(71,20): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(143,21): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(171,20): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(178,20): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(195,20): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(208,20): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(224,20): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(187): warning C4715: Chat::userLogin: значение возвращается не при всех путях выполнения
   Chat.vcxproj -> C:\Dev-Cpp\Chat\Chat\Debug\Chat.exe
