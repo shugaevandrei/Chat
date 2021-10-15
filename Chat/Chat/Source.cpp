@@ -6,318 +6,204 @@ using std::string;
 
 class User {
 private:
-	const string* _name;
-	const string* _login;
-	const string* _password;
-
-	string* _outMessage = NULL; //хранение исхоядщего сообщения
-	string* _inMessage = NULL; //хранение входящего сообщения
-	User* inUser = NULL;
-
-	void outMessage(string* Message) {
-		_outMessage = Message;
-	}
-	void inMessage(string* Message) {
-		_inMessage = Message;
-	}
+	string _name;
+	string _login;
+	string _password;
+	string _outMessage; //хранение исхоядщего сообщения
+	string _inMessage; //хранение входящего сообщения
+	User* inUser = NULL;//хранение информации об отправителя
+	void outMessage(string Message) { _outMessage = Message; }
+	void inMessage(string Message) { _inMessage = Message; }
 public:
-	User(const string* Uname, const string* Ulog, const string* Upas) : _name(Uname), _login(Ulog), _password(Upas) {}
+	User(const string Uname, const string Ulog, const string Upas) :_name(Uname), _login(Ulog), _password(Upas) {};
 	~User() {};
-	const string* getLogin()const {
-		return _login;
-	}
-	const string* getPassword()const {
-		return _password;
-	}
-	const string* getMessage() {
-		return _inMessage;
-	}
-	const string* getMyOutMessage() {
-		return _outMessage;
-	}
+	const string getLogin() { return _login; }
+	User* getinUser() { return inUser; }
+	const string getName() { return _name; }
+	const string getPassword() { return _password; }
+	const string getMessage() { return _inMessage; }
+	const string getMyOutMessage() { return _outMessage; }
+
 	bool getMessageUser();//получить входящее сообщение от другого пользователя
-	bool sendMessageUser(User& user, string* Message);//отправить сообщение пользователю
-	bool sendMessageUser(string* Message);//отправить сообщение всем пользователям чата
-	friend bool operator==(const User& user1, const User& user2);
+	bool sendMessageUser(string login, string Message);//отправить сообщение пользователю
+	bool sendMessageUser(string Message);//отправить сообщение всем пользователям чата
 };
 
-std::vector<User>* users = NULL;  //Вектор всех зарегистрированных пользователей
-std::vector<User>* usersChat = NULL;  //Вектор вошедших в чат
-/*
-bool User::sendMessageUser(User& user, char* Message) {
+std::vector<User> users;  //Вектор всех зарегистрированных пользователей
+User* curUser = NULL;//храним указатель на текущего пользователя
 
-	for (int i = 0; i < usersChat->size(); ++i) {
-		if (usersChat->at(i).getLogin() == this->getLogin()) {//проверка, есть ли чате ли сам пользователь желающий отправить сообщение
-
-			for (int i = 0; i < usersChat->size(); ++i) {
-
-				if (usersChat->at(i).getLogin() == user.getLogin()) {
-					std::cout <<std::endl;
-					std::cout << this<< std::endl;
-
-					this->outMessage(Message); //у себя сохраняем исходящее сообщение
-					user.inMessage(Message);  //у пользователя которому отправили- входящее
-					user.inUser = this;//сохраняем информацию об отправителе, допустим потом можно будет по этой ссылке посмотреть профиль пользователя
-					std::cout << this->getLogin() << ": сообщение \"" << user._inMessage << "\" отправлено пользователю " << user.getLogin() << std::endl;
-					return 1;
-				}
-			}
-			std::cout << "Пользователя с таким логином не существует" << std::endl;
-			return 0;
-		}
-
+bool User::sendMessageUser(string login, string Message) {
+	if (users.empty()) {
+		std::cout << "В чате нет пользователей" << std::endl;
+		return 0;
 	}
-	std::cout << "Прежде чем отправить сообщение, вам необходимо войти в чат" << std::endl;
-	return 0;
-}
-*/
-bool User::sendMessageUser(User& user, string* Message) {
-
-	for (unsigned int i = 0; i < usersChat->size(); ++i) {
-		if (usersChat->at(i).getLogin() == this->getLogin()) {//проверка, есть ли чате ли сам пользователь желающий отправить сообщение	
-
-			for (unsigned int i = 0; i < usersChat->size(); ++i) {
-
-				if (usersChat->at(i).getLogin() == user.getLogin()) {
-					this->outMessage(Message); //у себя сохраняем исходящее сообщение	
-					user.inMessage(Message);  //у пользователя которому отправили- входящее
-					user.inUser = this;//сохраняем информацию об отправителе, допустим потом можно будет по этой ссылке посмотреть профиль пользователя			
-					std::cout << this->getLogin() << ": сообщение \"" << user._inMessage << "\" отправлено пользователю " << user.getLogin() << std::endl;
-					return 1;
-				}
-			}
-			std::cout << "Пользователя с таким логином не существует" << std::endl;
-			return 0;
-		}
-
-	}
-	std::cout << "Прежде чем отправить сообщение, вам необходимо войти в чат" << std::endl;
-	return 0;
-}
-
-bool User::getMessageUser() {
-	for (unsigned int i = 0; i < usersChat->size(); ++i) {
-		if (usersChat->at(i).getLogin() == this->getLogin()) {//проверка, есть ли чате ли сам пользователь желающий прочитать сообщение	
-			if (this->getMessage() == NULL) {
-
-				//std::cout<<"адрес вызывабщего объекта " << this<< std::endl;
-				//std::cout<<this->_inMessage << std::endl;
-
-
-				std::cout << this->getLogin() << ": входящих сообщений нет" << std::endl;
-				return 0;
-			}
-			std::cout << this->getLogin() << ": последнее сообщение: \"" << this->getMessage() << "\" было от пользователя " << inUser->getLogin() << std::endl;
+	for (unsigned int i = 0; i < users.size(); ++i) {
+		if (users.at(i).getLogin() == login) {//проверка, есть ли чате такой пользователь	
+			this->outMessage(Message); //у себя сохраняем исходящее сообщение	
+			users.at(i).inMessage(Message);  //у пользователя которому отправили- входящее
+			users.at(i).inUser = this;//сохраняем информацию об отправителе, допустим потом можно будет по этой ссылке посмотреть профиль пользователя			
+			std::cout << this->getLogin() << ": сообщение \"" << users.at(i)._inMessage << "\" отправлено пользователю " << users.at(i).getLogin() << std::endl;
 			return 1;
 		}
+	}
+	std::cout << "Пользователя с таким логином не существует" << std::endl;
+	return 0;
+}
+
+bool User::sendMessageUser(string Message) {
+	if (users.empty()) {
+		std::cout << "В чате нет пользователей" << std::endl;
+		return 0;
+	}
+	std::cout << "пользователь " << this->getLogin() << " отправил cообщение \"" << Message << "\" всем пользователям чата " << std::endl;
+	this->outMessage(Message); //у себя сохраняем исходящее сообщение
+	for (unsigned int i = 0; i < users.size(); ++i) {
+		users.at(i).inMessage(Message);  //у пользователя которому отправили- входящее
+		users.at(i).inUser = this;//сохраняем информацию об отправителе, допустим потом можно будет по этой ссылке посмотреть профиль пользователя	
+	}
+	return 1;
+}
+bool User::getMessageUser() {
+	if (curUser->getLogin() == this->getLogin()) {
+		if (this->getMessage()[0] == '\0') {
+			std::cout << this->getLogin() << ": входящих сообщений нет" << std::endl;
+			return 0;
+		}
+		std::cout << this->getLogin() << ": последнее сообщение: \"" << this->getMessage() << "\" было от пользователя: " << inUser->getLogin() << std::endl;
+		return 1;
 	}
 	std::cout << this->getLogin() << ": прежде чем прочитать сообщение, вам необходимо войти в чат" << std::endl;
 	return 0;
 }
-bool User::sendMessageUser(string* Message) {
-	if (usersChat->empty()) {
-		std::cout << "В чате нет пользователей" << std::endl;
-		return 0;
-	}
-	for (unsigned int i = 0; i < usersChat->size(); ++i) {
-		this->sendMessageUser(usersChat->at(i), Message);
-	}
-	std::cout << "польователь " << this->getLogin() << " отправил cообщение всем пользователям чата " << std::endl;
-	return 1;
-}
 
-bool operator==(const User& user1, const User& user2) {
-	return (user1.getLogin() == user2.getLogin());
-}
 
 class Chat {
 private:
-	const string* _name;
-	int _maxUsers;
+	const string _name;
 public:
-	Chat(const string* nameChat, const int max) :_name(nameChat), _maxUsers(max) {
-		users = new std::vector<User>;
-		usersChat = new std::vector<User>;
-		std::cout << "Чат " << *_name << " на " << _maxUsers << " пользователей создан" << std::endl;
+	Chat(const string nameChat) :_name(nameChat) {
+		std::cout << "Чат " << _name << " создан" << std::endl;
 	}
 
-	bool regUser(User& Username);
-	bool userLogin(User& Username);
-	bool regUser(string* name, string* login, string* password);
-	bool userLogin(string* login, string* password);
-	//bool userlogout(User& Username);
-	bool userlogout(string* login);
-	bool delUser(User& Username);
+	bool regUser(string name, string login, string password);
+	bool userLogin(string login, string password);
+	bool userlogout();
+	bool delUser(string login);
 	bool getAllUsersChat();
 };
 
-
-bool Chat::regUser(User& Username) {
-
-	if (users->empty()) {
-		users->push_back(Username);
-		std::cout << "Поздравляю, вы зарегестрировались под логином " << Username.getLogin() << std::endl;
+bool Chat::regUser(string name, string login, string password) {
+	if (users.empty()) {
+		users.push_back(User(name, login, password));
+		std::cout << "Поздравляю, вы зарегестрировались под логином " << users.back().getLogin() << std::endl;
 		return 1;
 	}
 	else {
-		for (unsigned int i = 0; i < users->size(); ++i) {
-			if (users->at(i).getLogin() == Username.getLogin()) {
-				std::cout << "Пользователь с таким логином уже существует" << std::endl;
+		for (unsigned int i = 0; i < users.size(); ++i) {
+			if (users.at(i).getLogin() == login) {
+				std::cout << "Пользователь с логином " << login << " уже существует" << std::endl;
 				return 0;
 			}
 		}
-		users->push_back(Username);
+		users.push_back(User(name, login, password));
 	}
-	std::cout << "Поздравляю, вы зарегестрировались под логином " << Username.getLogin() << std::endl;
+	std::cout << "Поздравляю, вы зарегестрировались под логином " << users.back().getLogin() << std::endl;
 	return 1;
 }
 
+bool Chat::userLogin(string login, string password) {
+	for (unsigned int i = 0; i < users.size(); ++i) {
+		if (users.at(i).getLogin() == login) {
+			if (users.at(i).getPassword() == password) {
+				curUser = &users.at(i);
+				std::cout << "Вы вошли в чат под логином " << curUser->getLogin() << std::endl;
+				return 1;
+			}
+			else {
+				std::cout << "Пароль введен с ошибкой, попробуйте снова" << std::endl;
+				return 0;
+			}
+		}
+	}
+	std::cout << "Пользователя с таким именем не существует, попробуйте снова" << std::endl;
+	return 0;
+}
 
-bool Chat::regUser(string* name, string* login, string* password) {
-	if (users->empty()) {
-		//users->
-		static const string name1 = "bob";
-		static const string login1 = "bob";
-		static const string pass1 = "111";
-		static User user0(&name1, &login1, &pass1);
-
-		users->push_back(user0);
-		std::cout << "Поздравляю, вы зарегестрировались под логином 0" << *users->back().getLogin() << std::endl;
-		std::cout << "Размер вектора: " << users->size() << std::endl;
+bool Chat::userlogout() {
+	if (users.empty()) {
+		std::cout << "В чате нет пользователей" << std::endl;
+		return 0;
+	}
+	if (curUser == NULL) {
+		std::cout << "Пользователей выполнивших вход нет!" << std::endl;
+		return 0;
+	}
+	if (curUser != NULL) {
+		std::cout << "Пользователь " << curUser->getLogin() << " вышел из чата" << std::endl;
+		curUser = NULL;
 		return 1;
 	}
+}
+
+bool Chat::getAllUsersChat() {
+	if (users.empty()) {
+		std::cout << "Список пользователей пуст" << std::endl;
+		return 0;
+	}
 	else {
-		for (unsigned int i = 0; i < users->size(); ++i) {
-			//for(auto i = users->begin(); i < users->end();++i){
-				//std::cout << users->at(i).getLogin() << std::endl;
-			if (*users->at(i).getLogin() == *login)
-
-				//if(strcmp(login, login))
-				//if (users->at() >getLogin() == *login)
-			{
-				std::cout << "Пользователь с логином " << *login << " " << *users->at(i).getLogin() << " уже существует" << std::endl;
-
-
-				return 0;
-			}
+		std::cout << "Список пользователей" << std::endl;
+		for (unsigned int i = 0; i < users.size(); ++i) {
+			std::cout << users.at(i).getLogin() << std::endl;
 		}
-		users->push_back(User(name, login, password));
+		return 1;
 	}
-	std::cout << "Поздравляю, вы зарегестрировались под логином 1" << *users->back().getLogin() << std::endl;
-	return 1;
+
 }
 
-
-bool Chat::userLogin(User& Username) {
-	for (unsigned int i = 0; i < usersChat->size(); ++i) {
-		if (usersChat->at(i).getLogin() == Username.getLogin()) {
-			std::cout << "Пользователь с логином " << Username.getLogin() << " уже выполнил вход" << std::endl;
-			return 0;
-		}
-	}
-	usersChat->push_back(Username);
-	std::cout << "Вы вошли в чат под логином " << Username.getLogin() << std::endl;
-	return 1;
-}
-
-
-bool Chat::userLogin(string* login, string* password) {
-	for (unsigned int i = 0; i < usersChat->size(); ++i) {
-		if (usersChat->at(i).getLogin() == login) {
-			std::cout << "Пользователь с логином " << login << " уже выполнил вход" << std::endl;
-			return 0;
-		}
-	}
-
-	for (unsigned int i = 0; i < users->size(); ++i) {
-		if ((users->at(i).getPassword() == password) && (users->at(i).getLogin() == login)) {
-			usersChat->push_back(users->at(i));
-			std::cout << "Вы вошли в чат под логином " << users->at(i).getLogin() << std::endl;
-			return 1;
-		}
-	}
-	std::cout << "Введенные данные ошибочны, попробуйте снова" << std::endl;
-	return 0;
-}
-
-/*
-bool Chat::userlogout(User& Username) {
-	if (usersChat->empty()) {
-		std::cout << "В чате нет пользователей" << std::endl;
+bool Chat::delUser(string login) {
+	if (users.empty()) {
+		std::cout << " В чате никого нет" << std::endl;
 		return 0;
 	}
-	for (int i = 0; i < usersChat->size(); ++i) {
-		if (usersChat->at(i).getLogin() == Username.getLogin()) {
-			usersChat->erase(usersChat->begin() + i);
-			std::cout << "пользователь " << Username.getLogin() << " вышел из чата" << std::endl;
-			return 1;
-		}
-	}
-	std::cout << "Пользователя с именем " << Username.getLogin() << " не было в чате" << std::endl;
-	return 0;
-}
-*/
-
-bool Chat::userlogout(string* login) {
-	if (usersChat->empty()) {
-		std::cout << "В чате нет пользователей" << std::endl;
-		return 0;
-	}
-	for (unsigned int i = 0; i < usersChat->size(); ++i) {
-		if (usersChat->at(i).getLogin() == login) {
-			usersChat->erase(usersChat->begin() + i);
-			std::cout << "пользователь " << login << " вышел из чата" << std::endl;
-			return 1;
-		}
-	}
-	std::cout << "Пользователя с логином " << login << " не было в чате" << std::endl;
-	return 0;
-}
-
-bool Chat::delUser(User& Username) {
-	if (users->empty()) return 0;
-	for (unsigned int i = 0; i < users->size(); ++i) {
-		if (users->at(i).getLogin() == Username.getLogin()) {
-			users->erase(users->begin() + i);
-			std::cout << "Пользователь с именем " << Username.getLogin() << " удален" << std::endl;
+	for (unsigned int i = 0; i < users.size(); ++i) {
+		if (users.at(i).getLogin() == login) {
+			users.erase(users.begin() + i);
+			std::cout << "Пользователь с именем " << login << " удален" << std::endl;
 			return 1;
 		}
 	}
 	std::cout << " Такого пользователя не существует" << std::endl;
 	return 0;
 }
-bool Chat::getAllUsersChat() {
-	if (users->empty()) {
-		std::cout << "В чате нет пользователей" << std::endl;
-		return 0;
-	}
 
-	for (unsigned int i = 0; i < usersChat->size(); ++i) {
-		std::cout << usersChat->at(i).getLogin() << std::endl;
-	}
-	return 1;
-}
-
+char ch;
+int maxUsers;
+string name;
+string login;
+string pass;
+string message;
 int main()
 {
 	setlocale(LC_ALL, "Russian");
 
-	const int sizeNameChat = 30;
-	int maxUsers;
-	const int sizeNameUser = 30, sizeLoginUser = 30, sizePassUser = 30;
-	string nameChat;
-
 	std::cout << "Введите название для чата" << std::endl;
-	//std::cin.getline(nameChat, sizeNameChat);
-	getline(std::cin, nameChat);
-	std::cout << "Введите максимальное количество пользователей чата" << std::endl;
-	std::cin >> maxUsers;
-	Chat chat0(&nameChat, maxUsers);
+	getline(std::cin, name);
+	Chat chat0(name);
 
-	char ch;
 
 	do {
-		std::cout << "ВЫБЕРЕТЕ ДЕЙСТВИЕ: \n" << " R- регистрация нового пользователя\n I- войти в чат\n O- выйти из чата\n E- выход из программы\nA- список пользователей\n" << std::endl;
+		std::cout << "ВЫБЕРЕТЕ ДЕЙСТВИЕ: \n"
+			" R- регистрация нового пользователя\n"
+			" I- войти в чат\n"
+			" O- выйти из чата\n"
+			" E- выход из программы\n"
+			" A- список пользователей\n"
+			" S- сотправить сообщение пользователю\n"
+			" G- получить сообщение от пользователя\n"
+			" M- сотправить сообщение все пользователям\n"
+			" T- ответить пользователю на вхоядщее сообщение\n"
+			" D- удалить пользователя\n"
+			<< std::endl;
 		std::cin.clear();
 		std::cin.sync();
 		std::cin >> ch;
@@ -325,206 +211,135 @@ int main()
 		switch (ch) {
 		case 'R':
 		{
-			string name;
-			string login;
-			string pass;
-
 			std::cout << "введите имя новго пользователя: ";
 			std::cin.clear();
 			std::cin.sync();
-			//std::cin.getline(name, sizeLoginUser);
-			getline(std::cin, name);
+			do {
+				getline(std::cin, name);
+			} while (name[0] == '\0');
 
 			std::cout << "введите логин новго пользователя: ";
 			std::cin.clear();
 			std::cin.sync();
-			//std::cin.getline(login, sizeLoginUser);
-			getline(std::cin, login);
+			do {
+				getline(std::cin, login);
+			} while (login[0] == '\0');
 
-			std::cout << "введите пароль новго пользователя: ";
+			std::cout << "введите пароль (не менее 3-х символов) новго пользователя: ";
 			std::cin.clear();
 			std::cin.sync();
-			//std::cin.getline(pass, sizePassUser);
 			getline(std::cin, pass);
+			do {
+				getline(std::cin, pass);
+			} while (pass.size() < 3);
 
-			chat0.regUser(&name, &login, &pass);
-			std::cout << std::endl;
+			chat0.regUser(name, login, pass);
 		}
-
 		break;
 		case 'I':
 		{
-			string login;
-			string pass;
-			//std::cout << &name << name << std::endl;
-			//std::cout << &login << login << std::endl;
-			//std::cout << &pass << pass << std::endl;
+			if (users.empty())std::cout << "Для входа в чат необходимо заргистрировать хотя бы одного пользователя" << std::endl;
+			else if (curUser == NULL) {
+				std::cout << "введите логин пользователя: ";
+				std::cin.clear();
+				std::cin.sync();
+				getline(std::cin, login);
 
+				std::cout << "введите пароль пользователя: ";
+				std::cin.clear();
+				std::cin.sync();
+				getline(std::cin, pass);
 
-			std::cout << "введите логин пользователя: ";
-			std::cin.clear();
-			std::cin.sync();
-			//std::cin.getline(login, sizeLoginUser);
-			getline(std::cin, login);
+				chat0.userLogin(login, pass);
+			}
+			else {
+				std::cout << "Вход выполнен пользователем: " << curUser->getLogin() << std::endl;
+				std::cout << "Для входа по новым именем необходимо выйти из текущего профиля" << std::endl;
+			}
 
-			std::cout << "введите пароль пользователя: ";
-			std::cin.clear();
-			std::cin.sync();
-			//std::cin.getline(pass, sizePassUser);
-			getline(std::cin, pass);
-
-			chat0.userLogin(&login, &pass);
-			std::cout << std::endl;
 		}
 		break;
 		case 'O':
 		{
-			string login;
-			//std::cout << &name << name << std::endl;
-			//std::cout << &login << login << std::endl;
-			//std::cout << &pass << pass << std::endl;
-
-			std::cout << "введите логин пользователя: ";
-			std::cin.clear();
-			std::cin.sync();
-			//std::cin.getline(login, sizeLoginUser);
-			getline(std::cin, login);
-
-			chat0.userlogout(&login);
+			chat0.userlogout();
 			std::cout << std::endl;
+		}
+		break;
+		case 'S':
+		{
+			if (curUser == NULL)std::cout << "Прежде чем отправить сообщение, войдите в чат" << std::endl;
+			else {
+				std::cout << "введите логин получателя: ";
+				std::cin.clear();
+				std::cin.sync();
+				getline(std::cin, login);
+
+				std::cout << "введите текст сообщения получателя: ";
+				std::cin.clear();
+				std::cin.sync();
+				getline(std::cin, message);
+				curUser->sendMessageUser(login, message);
+			}
+		}
+		break;
+		case 'G':
+		{
+			if (curUser == NULL)std::cout << "Прежде чем получить сообщение, войдите в чат" << std::endl;
+			else curUser->getMessageUser();
+		}
+		break;
+		case 'M':
+		{
+			if (curUser == NULL)std::cout << "Прежде чем отправить сообщение, войдите в чат" << std::endl;
+			else {
+				std::cout << "введите текст сообщения получателя: ";
+				std::cin.clear();
+				std::cin.sync();
+				getline(std::cin, message);
+				curUser->sendMessageUser(message);
+			}
 		}
 		break;
 		case 'A':
 		{
-			//for (unsigned int i = 0; i < users->size(); ++i) {
-			//for (auto i = users->begin(); i < users->end(); ++i){
-			//	std::cout << "GHBDRN" << std::endl;
-			//	std::cout << users->at(i).getLogin()<< std::endl;
-				//std::cout <<  << std::endl;
-			//}
-			std::cout << users->size() << std::endl;
-			for (unsigned int i = 0; i < users->size(); ++i) {
-				std::cout << *users->at(i).getLogin() << std::endl;
+			chat0.getAllUsersChat();
+		}
+		break;
+		case 'T':
+		{
+			if (curUser == NULL)std::cout << "Прежде чем ответить на сообщение, войдите в чат" << std::endl;
+			else {
+				if (curUser->getMessageUser()) {
+					std::cout << "введите текст сообщения: ";
+					std::cin.clear();
+					std::cin.sync();
+					getline(std::cin, message);
+					curUser->sendMessageUser(curUser->getinUser()->getLogin(), message);
+				}
+			}
+		}
+		case 'D':
+		{
+			if (users.empty()) {
+				std::cout << " В чате никого нет" << std::endl;
+			}
+			else {
+				std::cout << "введите логин пользователя: ";
+				std::cin.clear();
+				std::cin.sync();
+				getline(std::cin, login);
+				chat0.delUser(login);
 			}
 		}
 		break;
 		default:
-			std::cout << "некорректный ввод! Повторите снова" << std::endl;
-			break;
+		{
+			if (ch != 'E')std::cout << "Некорректная команда! Попробуйте снова!" << std::endl;
+		}
+		break;
+
 		}
 	} while (ch != 'E');
-
-	/*
-	char name0[] = "Boba";
-	char name1[] = "Biba";
-	char name2[] = "Pupa";
-	char name3[] = "Lupa";
-
-	char fakeName[] = "buba";
-
-	char login0[] = "Boba";
-	char login1[] = "Biba";
-	char login2[] = "Pupa";
-	char login3[] = "Lupa";
-
-	char fakeLogin[] = "buba";
-
-	char pass0[] = "1212";
-	char pass1[] = "1213";
-	char pass2[] = "1214";
-	char pass3[] = "1215";
-
-	char fakePass[] = "1216";
-
-	chat0.regUser(name0, login0, pass0);
-	chat0.regUser(name0, login0, pass0);
-
-	chat0.regUser(name1, login1, pass1);
-	chat0.regUser(name2, login2, pass2);
-	chat0.regUser(name3, login3, pass3);
-
-	chat0.userLogin(login0, pass0);
-	chat0.userLogin(login0, pass0);
-
-	chat0.userLogin(fakeLogin, pass1);
-	chat0.userLogin(login1, pass1);
-	chat0.userLogin(login2, pass2);
-
-	chat0.getAllUsersChat();
-
-
-	chat0.userlogout(login0);
-	chat0.userlogout(login0);
-
-	chat0.userlogout(login1);
-	chat0.userlogout(login2);
-
-	chat0.userlogout(login0);
-	chat0.userlogout(login1);
-	chat0.userlogout(login2);
-
-	chat0.userLogin(login0, pass0);
-	chat0.userLogin(login1, pass1);
-	chat0.userLogin(login2, pass2);
-
-	char mess0[] = "ку-ку";
-	char mess1[] = "привет";
-	char mess2[] = "Привет всем!";
-
-	usersChat->at(0).sendMessageUser(usersChat->at(1), mess0);
-	std::cout << std::endl;
-	usersChat->at(1).getMessageUser();
-	usersChat->at(0).getMessageUser();
-
-	usersChat->at(1).sendMessageUser(usersChat->at(0), mess1);
-	usersChat->at(0).getMessageUser();
-
-	chat0.userlogout(login1);
-	chat0.userLogin(login1, pass1);
-	chat0.getAllUsersChat();
-*/
-
-//usersChat->at(1).getMessageUser();
-//usersChat->at(0).getMessageUser();
-//chat0.userLogin(login1, pass1);
-//usersChat->at(1).getMessageUser();
-
-//usersChat->at(0).sendMessageUser(mess2);
-
-//usersChat->at(0).getMessageUser();
-//usersChat->at(1).getMessageUser();
-//usersChat->at(2).getMessageUser();
-//auto iter = usersChat->begin();
-	//for(int i = 0; i < usersChat->size(); ++i){
-
-	//usersChat->at(i).getMessageUser();
-
-	//std::cout <<&usersChat->at(i) << std::endl;
-
-//}
-
-
-//std::cout <<&usersChat->at(0)<< std::endl;
-//std::cout <<&user0<<std::endl;
-//std::cout <<&user1<<std::endl;
-//std::cout <<&user2<<std::endl;
-//std::cout <<&user3<<std::endl;
-
-//user1.getMessageUser();
-//user2.getMessageUser();
-//user3.getMessageUser();
-
-//std::cout << usersChat->at(0).getMessage() << usersChat->at(0).getLogin() << std::endl;
-//std::cout << usersChat->at(1).getMessage() << usersChat->at(1).getLogin() << std::endl;
-//std::cout << usersChat->at(2).getMessage() << usersChat->at(2).getLogin() << std::endl;
-//std::cout << usersChat->at(3).getMessage() << usersChat->at(3).getLogin() << std::endl;
-
-//user0.getMessageUser();
-//user1.getMessageUser();
-
-
-//for(int i = 0; i < usersChat->size(); ++i){
-//	    std::cout<<&usersChat->at(i)<<std::endl;}
-
+	std::cout << "Приходите еще в наш дружный чат!";
 	return 0;
 }
