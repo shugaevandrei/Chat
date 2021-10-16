@@ -1,3 +1,3 @@
 ﻿  Source.cpp
-C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(146): warning C4715: Chat::userlogout: значение возвращается не при всех путях выполнения
+C:\Dev-Cpp\Chat\Chat\Chat\Source.cpp(147): warning C4715: Chat::userlogout: значение возвращается не при всех путях выполнения
   Chat.vcxproj -> C:\Dev-Cpp\Chat\Chat\Debug\Chat.exe
