@@ -1,12 +1,12 @@
 #pragma once
 #include <iostream> 
 #include <string> 
+#include <utility>//<-----
 using std::string;
 
 class User {
 private:
-	string _name;
-	string _login;
+	std::pair<string, string> _dataUser;
 	string _password;
 	string _outMessage; //хранение исхоядщего сообщения
 	string _inMessage; //хранение входящего сообщения
@@ -14,12 +14,13 @@ private:
 	void outMessage(string Message) { _outMessage = Message; }
 	void inMessage(string Message) { _inMessage = Message; }
 public:
-	User(const string Uname, const string Ulog, const string Upas) :_name(Uname), _login(Ulog), _password(Upas) {};
-	//User() = default;
+	User(const string Uname, const string Ulog, const string Upas) : _password(Upas) {//<---
+		_dataUser = make_pair(Ulog, Uname);//<----
+	};
 	~User() {};
-	const string getLogin() { return _login; }
+	const string getLogin() { return _dataUser.first; }
 	User* getinUser() { return inUser; }
-	const string getName() { return _name; }
+	const string getName() { return  _dataUser.second;}
 	const string getPassword() { return _password; }
 	const string getMessage() { return _inMessage; }
 	const string getMyOutMessage() { return _outMessage; }

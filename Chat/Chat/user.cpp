@@ -1,5 +1,6 @@
 #include <iostream> 
 #include <string> 
+#include <vector> 
 #include "user.h"
 #include "global.h"
 #include "chat.h" 
@@ -10,12 +11,12 @@ bool User::sendMessageUser(string login, string Message) {
 		std::cout << "В чате нет пользователей" << std::endl;
 		return false;
 	}
-	for (unsigned int i = 0; i < users.size(); ++i) {
-		if (users.at(i).getLogin() == login) {//проверка, есть ли чате такой пользователь	
+	for(std::vector<User>::iterator it = users.begin(); it != users.end(); ++it){
+		if (it->getLogin() == login) {//проверка, есть ли чате такой пользователь	
 			this->outMessage(Message); //у себя сохраняем исходящее сообщение	
-			users.at(i).inMessage(Message);  //у пользователя которому отправили- входящее
-			users.at(i).inUser = this;//сохраняем информацию об отправителе, допустим потом можно будет по этой ссылке посмотреть профиль пользователя			
-			std::cout << this->getLogin() << ": сообщение \"" << users.at(i)._inMessage << "\" отправлено пользователю " << users.at(i).getLogin() << std::endl;
+			it->inMessage(Message);  //у пользователя которому отправили- входящее
+			it->inUser = this;//сохраняем информацию об отправителе, допустим потом можно будет по этой ссылке посмотреть профиль пользователя			
+			std::cout << this->getLogin() << ": сообщение \"" << it->_inMessage << "\" отправлено пользователю " << it->getLogin() << std::endl;
 			return true;
 		}
 	}
@@ -30,9 +31,9 @@ bool User::sendMessageUser(string Message) {
 	}
 	std::cout << "пользователь " << this->getLogin() << " отправил cообщение \"" << Message << "\" всем пользователям чата " << std::endl;
 	this->outMessage(Message); //у себя сохраняем исходящее сообщение
-	for (unsigned int i = 0; i < users.size(); ++i) {
-		users.at(i).inMessage(Message);  //у пользователя которому отправили- входящее
-		users.at(i).inUser = this;//сохраняем информацию об отправителе, допустим потом можно будет по этой ссылке посмотреть профиль пользователя	
+	for (std::vector<User>::iterator it = users.begin(); it != users.end(); ++it) {
+		it->inMessage(Message);  //у пользователя которому отправили- входящее
+		it->inUser = this;//сохраняем информацию об отправителе, допустим потом можно будет по этой ссылке посмотреть профиль пользователя	
 	}
 	return true;
 }

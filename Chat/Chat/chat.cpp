@@ -13,8 +13,8 @@ bool Chat::regUser(string name, string login, string password) {
 		return true;
 	}
 	else {
-		for (unsigned int i = 0; i < users.size(); ++i) {
-			if (users.at(i).getLogin() == login) {
+		for (std::vector<User>::iterator it = users.begin(); it != users.end(); ++it) {
+			if (it->getLogin() == login) {
 				std::cout << "Пользователь с логином " << login << " уже существует" << std::endl;
 				return false;
 			}
@@ -26,10 +26,10 @@ bool Chat::regUser(string name, string login, string password) {
 }
 
 bool Chat::userLogin(string login, string password) {
-	for (unsigned int i = 0; i < users.size(); ++i) {
-		if (users.at(i).getLogin() == login) {
-			if (users.at(i).getPassword() == password) {
-				curUser = &users.at(i);
+	for (std::vector<User>::iterator it = users.begin(); it != users.end(); ++it) {
+		if (it->getLogin() == login) {
+			if (it->getPassword() == password) {
+				curUser = &(*it);
 				std::cout << "Вы вошли в чат под логином " << curUser->getLogin() << std::endl;
 				return true;
 			}
@@ -66,8 +66,8 @@ bool Chat::getAllUsersChat() {
 	}
 	else {
 		std::cout << "Список пользователей" << std::endl;
-		for (unsigned int i = 0; i < users.size(); ++i) {
-			std::cout << users.at(i).getLogin() << std::endl;
+		for (std::vector<User>::iterator it = users.begin(); it != users.end(); ++it) {
+			std::cout << it->getLogin() << std::endl;
 		}
 		return true;
 	}
@@ -79,9 +79,9 @@ bool Chat::delUser(string login) {
 		std::cout << " В чате никого нет" << std::endl;
 		return false;
 	}
-	for (unsigned int i = 0; i < users.size(); ++i) {
-		if (users.at(i).getLogin() == login) {
-			users.erase(users.begin() + i);
+	for (std::vector<User>::iterator it = users.begin(); it != users.end(); ++it) {
+		if (it -> getLogin() == login) {
+			users.erase(it);
 			std::cout << "Пользователь с именем " << login << " удален" << std::endl;
 			return true;
 		}
